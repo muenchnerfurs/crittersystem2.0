@@ -72,6 +72,17 @@ class EventConfigStore implements ResetInterface
 
     public const ACCESS_MODES = ['public', 'staff', 'admin'];
 
+    /*
+     * Hand-counted figures behind the fun section of the closing statistics. Nothing in the
+     * application can derive these, so they are typed in once per event and stored as JSON.
+     */
+    public const KEY_STATS_TALLIES = 'stats.tallies';
+    public const KEY_STATS_CUSTOM_TALLIES = 'stats.custom_tallies';
+    public const KEY_STATS_HOURLY_RATE = 'stats.hourly_rate';
+    public const KEY_STATS_CURRENCY = 'stats.currency';
+
+    public const DEFAULT_STATS_CURRENCY = 'EUR';
+
     // Operational configuration, all admin-editable via /manage/operations.
     // Defaults must never be hard-coded at call sites - read them from here.
     public const KEY_BAN_NOSHOW_THRESHOLD = 'ban.noshow_threshold';
@@ -80,6 +91,9 @@ class EventConfigStore implements ResetInterface
     public const KEY_INFODESK_WELCOME = 'infodesk.welcome_message';
     public const KEY_INFODESK_FINALIZATION = 'infodesk.finalization_message';
     public const KEY_INFODESK_CLAIM_TIMEOUT = 'infodesk.claim_timeout';
+
+    /** How far ahead of a shift somebody may be admitted to the venue, in seconds. */
+    public const KEY_SECURITY_CHECKIN_WINDOW = 'security.checkin_window';
     public const KEY_MESSAGE_EDIT_WINDOW = 'messages.edit_window';
     public const KEY_CALL_RESPONSE_TIMEOUT = 'call.response_timeout';
     public const KEY_CALL_MANAGER_LEAD = 'call.manager_lead';
@@ -129,10 +143,11 @@ class EventConfigStore implements ResetInterface
     public const KEY_SESSION_IDLE_MINUTES = 'session.idle_minutes';
 
     public const DEFAULT_BAN_NOSHOW_THRESHOLD = 2;       // no-show shifts
-    public const DEFAULT_BAN_SCREEN_MESSAGE = "Your account is suspended :)";       // Ban Message
+    public const DEFAULT_BAN_SCREEN_MESSAGE = "Your account is suspended :)";
     public const DEFAULT_INFODESK_CLAIM_TIMEOUT = 300;   // seconds
-    public const DEFAULT_INFODESK_WELCOME = "Welcome to Info Desk Support - What can we do to help?";  // Initial Message for Chat
-    public const DEFAULT_INFODESK_FINALIZATION = "Chat closed - Thanks for your contact";  // Closing message for Chat
+    public const DEFAULT_SECURITY_CHECKIN_WINDOW = 7200; // seconds
+    public const DEFAULT_INFODESK_WELCOME = "Welcome to Info Desk Support - What can we do to help?";
+    public const DEFAULT_INFODESK_FINALIZATION = "Chat closed - Thanks for your contact";
     public const DEFAULT_MESSAGE_EDIT_WINDOW = 60;       // seconds
     public const DEFAULT_CALL_RESPONSE_TIMEOUT = 600;    // seconds
     public const DEFAULT_CALL_MANAGER_LEAD = 300;        // seconds before shift start
@@ -140,9 +155,9 @@ class EventConfigStore implements ResetInterface
     public const DEFAULT_HOURS_RECOMMENDED_MAX = 20;     // hours, warning threshold
     public const DEFAULT_HOURS_NIGHT_START = 2;          // hour of day (inclusive)
     public const DEFAULT_HOURS_NIGHT_END = 8;            // hour of day (exclusive)
-    public const DEFAULT_HOURS_NIGHT_MULTIPLIER = 2.0;   // Night factor
-    public const DEFAULT_HOURS_NOSHOW_MULTIPLIER = -2.0; // No-show Multiplier
-    public const DEFAULT_SESSION_IDLE_MINUTES = 60;      // Minutes without a request
+    public const DEFAULT_HOURS_NIGHT_MULTIPLIER = 2.0;
+    public const DEFAULT_HOURS_NOSHOW_MULTIPLIER = -2.0;
+    public const DEFAULT_SESSION_IDLE_MINUTES = 60;      // minutes without a request
     public const DEFAULT_CHECKIN_MESSAGE_EN = 'Please go the info-desk for the Critter Check-in';
     public const DEFAULT_CHECKIN_MESSAGE_DE = 'Bitte gehe zum Info-Desk für den Critter Check-in';
 
@@ -198,6 +213,11 @@ class EventConfigStore implements ResetInterface
     /**
      * Read a value stored as an ISO-8601 string back as a date, or null when the
      * key is unset/blank or the stored value cannot be parsed.
+     *
+     * The result carries the *named* UTC zone. Stored values are ISO-8601 with a "+00:00" offset,
+     * which parses to a timezone named "+00:00"; that does not match the UTC model_timezone of the
+     * event-config form fields and makes Symfony Form throw. setTimezone() keeps the instant and
+     * fixes the name.
      */
     public function getDate(string $key): ?\DateTimeImmutable
     {
@@ -207,11 +227,6 @@ class EventConfigStore implements ResetInterface
         }
 
         try {
-            // Normalise to the *named* UTC zone. Stored values are ISO-8601 with
-            // a "+00:00" offset, which would otherwise yield a DateTimeImmutable
-            // whose timezone name is "+00:00" - that mismatches the UTC
-            // model_timezone of the event-config form fields and makes Symfony
-            // Form throw. setTimezone() keeps the instant and fixes the name.
             return (new \DateTimeImmutable($value))->setTimezone(new \DateTimeZone('UTC'));
         } catch (\Exception) {
             return null;
@@ -254,7 +269,8 @@ class EventConfigStore implements ResetInterface
      * /manage/operations). Auditing at the store means a new config screen cannot forget to.
      *
      * The old value is recorded alongside the new one, so the trail answers "who changed it, from
-     * what, to what".
+     * what, to what". Writing the value it already holds is not a change and produces no audit
+     * event.
      */
     public function set(string $key, mixed $value): void
     {
@@ -266,7 +282,7 @@ class EventConfigStore implements ResetInterface
             $this->em->persist(new EventConfig($key, $value));
         } else {
             if ($previous === $value) {
-                return; // Not a change; do not manufacture an audit event for a no-op save.
+                return;
             }
             $config->setValue($value);
         }

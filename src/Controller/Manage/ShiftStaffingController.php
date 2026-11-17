@@ -10,6 +10,7 @@ use App\Repository\UserRepository;
 use App\Repository\VolunteerTypeRepository;
 use App\Service\Assignment\ManualAssignmentService;
 use App\Service\NoShowBanService;
+use App\Service\Shift\ShiftAttendanceService;
 use App\Service\Shift\ShiftGroupResolver;
 use App\Service\Shift\VolunteerTypeOrdering;
 use App\Service\ShiftSignupService;
@@ -24,6 +25,7 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\Requirement\Requirement;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Translation\TranslatableMessage;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Staffing screens for a single shift.
@@ -48,17 +50,20 @@ final class ShiftStaffingController extends AbstractController
         private readonly ManualAssignmentService $assignments,
         private readonly ShiftGroupResolver $groups,
         private readonly VolunteerTypeOrdering $typeOrder,
+        private readonly ShiftAttendanceService $attendance,
     ) {
     }
 
+    /**
+     * `partialHeld` reports how much of a grouped commitment each volunteer actually holds. A
+     * manager who splits a group, or a volunteer added before the group existed, leaves somebody on
+     * part of it, and that has to stay visible on this screen rather than pass for a full booking.
+     */
     #[Route('/{id}/staffing', name: 'app_manage_shift_needs', methods: ['GET'], requirements: ['id' => Requirement::UUID])]
     public function staffing(Request $request, #[MapEntity(mapping: ['id' => 'uuid'])] Shift $shift): Response
     {
         $this->denyAccessUnlessGranted('shift:manage', $shift);
 
-        // How much of a grouped commitment each volunteer actually holds. A manager who split a group
-        // (or a volunteer added before the group existed) leaves somebody on part of it, and that has
-        // to stay visible rather than become invisible history.
         $members = $this->groups->membersFor($shift);
         $partial = [];
         foreach ($shift->getEntries() as $entry) {
@@ -92,6 +97,14 @@ final class ShiftStaffingController extends AbstractController
         return new JsonResponse($formatter->results($q === '' ? [] : $this->users->searchByName($q)));
     }
 
+    /**
+     * A manager assignment is an override: capacity and membership are deliberately not enforced,
+     * and the availability and hours warnings are overridden rather than refused.
+     *
+     * It goes through ManualAssignmentService rather than a bare persist, so the assignment is
+     * audited, the live signal fires, and a grouped shift takes the volunteer onto every member
+     * unless the manager asked for a split.
+     */
     #[Route('/{id}/assign', name: 'app_manage_shift_assign', methods: ['POST'], requirements: ['id' => Requirement::UUID])]
     public function assign(Request $request, #[MapEntity(mapping: ['id' => 'uuid'])] Shift $shift): Response
     {
@@ -106,10 +119,6 @@ final class ShiftStaffingController extends AbstractController
             } elseif ($this->entries->findOneByShiftAndUser($shift, $user) !== null) {
                 $this->addFlash('warning', new TranslatableMessage('manage.shift.staffing.flash.already_on_shift', ['%name%' => $user->getName()]));
             } else {
-                // Manager override: capacity and membership are deliberately not enforced, so the
-                // availability/hours warnings are overridden rather than refused. This goes through
-                // ManualAssignmentService and not a bare persist, so the assignment is audited, the
-                // live signal fires, and a grouped shift takes the volunteer onto every member.
                 $groupSplit = $request->request->getBoolean('group_split');
                 $this->assignments->assign($shift, $user, $type, override: true, actor: $this->getUser(), groupSplit: $groupSplit);
 
@@ -186,19 +195,27 @@ final class ShiftStaffingController extends AbstractController
         return $this->redirectToRoute('app_manage_shift_needs', ['id' => $shift->getUuid()]);
     }
 
+    /**
+     * Scoped to the entry's own shift: marking a no-show can trigger the automatic ban, so this must
+     * never be reachable for another department's shift. Reaching the configured no-show threshold
+     * locks the account.
+     *
+     * The mutation runs through ShiftAttendanceService so it is announced over Mercure. The
+     * operations board shows a volunteer's no-show state; without the signal a board left up in the
+     * department keeps showing the position as attended until something unrelated redraws it.
+     */
     #[Route('/entries/{id}/noshow', name: 'app_manage_shift_entry_noshow', methods: ['POST'], requirements: ['id' => Requirement::UUID])]
     public function toggleNoshow(Request $request, #[MapEntity(mapping: ['id' => 'uuid'])] ShiftEntry $entry): Response
     {
-        // Scoped to the entry's own shift: a no-show can trigger the automatic
-        // ban, so this must never be reachable for another department's shift.
         $this->denyAccessUnlessGranted('shift:manage', $entry->getShift());
 
         if ($this->isCsrfTokenValid('noshow'.$entry->getId(), (string) $request->request->get('_token'))) {
-            $entry->setNoshow(!$entry->isNoshow());
-            $entry->setNoshowComment($entry->isNoshow() ? (string) $request->request->get('comment') ?: null : null);
-            $this->em->flush();
+            if ($entry->isNoshow()) {
+                $this->attendance->clearNoShow($entry);
+            } else {
+                $this->attendance->markNoShow($entry, (string) $request->request->get('comment') ?: null);
+            }
 
-            // Reaching the configured no-show threshold locks the account.
             if ($entry->isNoshow() && $this->noShowBans->evaluate($entry->getUser())) {
                 $this->addFlash('warning', new TranslatableMessage('manage.shift.staffing.flash.auto_banned'));
             } else {
@@ -208,6 +225,34 @@ final class ShiftStaffingController extends AbstractController
             }
         }
 
-        return $this->redirectToRoute('app_manage_shift_needs', ['id' => $entry->getShift()->getUuid()]);
+        return $this->returnTo($request, $entry->getShift());
+    }
+
+    /**
+     * Back to the surface the manager marked the no-show from.
+     *
+     * The target is never a URL and never a route name from the request: only three screens are
+     * reachable, each rebuilt here from a resource the caller has already been authorized for or
+     * from parameters the destination re-checks for itself. That is what keeps a field posted by a
+     * browser from becoming an open redirect.
+     */
+    private function returnTo(Request $request, Shift $shift): Response
+    {
+        $department = (string) $request->request->get('board_department', '');
+        $date = (string) $request->request->get('board_date', '');
+
+        if (Uuid::isValid($department) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) === 1) {
+            return $this->redirectToRoute('app_board_show', [
+                'department' => $department,
+                'date' => $date,
+                'view' => 'shifts',
+            ]);
+        }
+
+        if ($request->request->get('return') === 'shift') {
+            return $this->redirectToRoute('app_shift_show', ['id' => $shift->getUuid()]);
+        }
+
+        return $this->redirectToRoute('app_manage_shift_needs', ['id' => $shift->getUuid()]);
     }
 }

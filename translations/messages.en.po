@@ -8,6 +8,90 @@ msgstr ""
 # ui.* - global chrome (not owned by any single feature)
 # ==========================================================================
 
+msgid "common.state.published"
+msgstr "Published"
+
+msgid "shift.dossier.action.details"
+msgstr "Details"
+
+msgid "shift.dossier.action.edit"
+msgstr "Edit shift"
+
+msgid "shift.dossier.action.message"
+msgstr "Message"
+
+msgid "shift.dossier.action.staffing"
+msgstr "Manage staffing"
+
+msgid "shift.dossier.actions"
+msgstr "Tools"
+
+msgid "shift.dossier.audience"
+msgstr "Offered to"
+
+msgid "shift.dossier.batch"
+msgstr "Origin"
+
+msgid "shift.dossier.batch_created"
+msgstr "Created as part of a batch or import."
+
+msgid "shift.dossier.checked_in"
+msgstr "checked in"
+
+msgid "shift.dossier.checkin"
+msgstr "Check-in"
+
+msgid "shift.dossier.checkin_required"
+msgstr "Check-in required before this shift"
+
+msgid "shift.dossier.created_by"
+msgstr "Created by"
+
+msgid "shift.dossier.creator_unknown"
+msgstr "Unknown"
+
+msgid "shift.dossier.managers"
+msgstr "Who to ask"
+
+msgid "shift.dossier.managers_empty"
+msgstr "Nobody is assigned to manage this department."
+
+msgid "shift.dossier.managers_intro"
+msgstr "The people responsible for this department's shifts."
+
+msgid "shift.dossier.no_description.body"
+msgstr "Nobody wrote down what this shift involves. Ask %department% what the volunteer is expected to do."
+
+msgid "shift.dossier.no_description.title"
+msgstr "No description was given."
+
+msgid "shift.dossier.notes"
+msgstr "Notes"
+
+msgid "shift.dossier.origin"
+msgstr "Who made this shift"
+
+msgid "shift.dossier.override"
+msgstr "Assigned with an override: %reason%"
+
+msgid "shift.dossier.roster"
+msgstr "Who is on this shift"
+
+msgid "shift.dossier.roster_empty"
+msgstr "Nobody is on this shift yet."
+
+msgid "shift.dossier.title"
+msgstr "Shift details"
+
+msgid "shift.dossier.updated_by"
+msgstr "Last changed by"
+
+msgid "shift.dossier.volunteer"
+msgstr "Volunteer"
+
+msgid "shift.list.no_description"
+msgstr "no description"
+
 msgid "ui.app.title"
 msgstr "Critter Management System"
 
@@ -752,17 +836,41 @@ msgstr "Locate User"
 msgid "backstage.empty.no_distributions"
 msgstr "No distributions yet."
 
+msgid "backstage.flash.already_revoked"
+msgstr "That hand-out was already revoked."
+
 msgid "backstage.flash.checked_in"
 msgstr "%name% checked in."
 
 msgid "backstage.flash.checkin_removed"
 msgstr "Check-in removed for %name%."
 
+msgid "backstage.flash.correct_min_quantity"
+msgstr "A quantity of at least 1 is needed; revoke the hand-out instead."
+
+msgid "backstage.flash.correct_over_limit"
+msgstr "That would pass the limit of %max% per person for %item%."
+
+msgid "backstage.flash.corrected"
+msgstr "Corrected %item% to %count%."
+
 msgid "backstage.flash.gave"
 msgstr "Gave %count% × %item% to %name%."
 
+msgid "backstage.flash.gave_bulk"
+msgstr "Handed %count% item(s) to %name%."
+
+msgid "backstage.flash.give_failed"
+msgstr "Could not give %item%: %reason%"
+
 msgid "backstage.flash.hours_recalculated"
 msgstr "Hours recalculated."
+
+msgid "backstage.flash.nothing_selected"
+msgstr "Nothing was selected."
+
+msgid "backstage.flash.revoked"
+msgstr "Revoked %count% hand-out(s)."
 
 msgid "backstage.flash.unknown_item"
 msgstr "Unknown item."
@@ -896,6 +1004,9 @@ msgstr "Check in"
 msgid "backstage.locate.action.give_anyway"
 msgstr "Give anyway"
 
+msgid "backstage.locate.action.give_selected"
+msgstr "Give selected"
+
 msgid "backstage.locate.action.give"
 msgstr "Give"
 
@@ -907,6 +1018,21 @@ msgstr "↻ Recalculate"
 
 msgid "backstage.locate.action.remove_checkin"
 msgstr "Remove check-in"
+
+msgid "backstage.locate.action.revoke"
+msgstr "Revoke"
+
+msgid "backstage.locate.action.revoke_selected"
+msgstr "Revoke selected"
+
+msgid "backstage.locate.action.save_quantity"
+msgstr "Save the corrected quantity"
+
+msgid "backstage.locate.action.select_all"
+msgstr "Select all"
+
+msgid "backstage.locate.action.select_item"
+msgstr "Select %item%"
 
 msgid "backstage.locate.action.view_profile"
 msgstr "View full profile"
@@ -923,11 +1049,17 @@ msgstr "Checked in"
 msgid "backstage.locate.confirm.remove_checkin"
 msgstr "Remove the check-in for %name%?"
 
+msgid "backstage.locate.confirm.revoke"
+msgstr "Revoke this hand-out? It stops counting towards what this volunteer has received, and the item becomes claimable again."
+
 msgid "backstage.locate.contact"
 msgstr "Contact"
 
 msgid "backstage.locate.contact_options"
 msgstr "Contact options"
+
+msgid "backstage.locate.corrected_from"
+msgstr "Corrected from %count%"
 
 msgid "backstage.locate.credited_hours"
 msgstr "Credited hours:"
@@ -980,6 +1112,12 @@ msgstr "Missing:"
 msgid "backstage.locate.placeholder.override_reason"
 msgstr "Why this is being handed over regardless"
 
+msgid "backstage.locate.placeholder.revoke_reason"
+msgstr "Why is this being revoked? (optional)"
+
+msgid "backstage.locate.placeholder.shared_notes"
+msgstr "Note for every item handed over (optional)"
+
 msgid "backstage.locate.remaining"
 msgstr "%count% left"
 
@@ -1009,6 +1147,9 @@ msgstr "Goodies distribution"
 
 msgid "backstage.locate.shifts.title"
 msgstr "Shifts"
+
+msgid "backstage.locate.state.revoked"
+msgstr "Revoked"
 
 msgid "backstage.locate.tab.open"
 msgstr "Open"
@@ -1125,7 +1266,7 @@ msgid "call.action.not_now"
 msgstr "Not now"
 
 msgid "call.empty.message"
-msgstr "No open calls - Make sure you set your status to `Free to HELP`"
+msgstr "No open calls right now. Anything that comes up will appear here."
 
 msgid "call.empty.title"
 msgstr "No open calls"
@@ -3634,6 +3775,12 @@ msgstr "Assigned"
 
 msgid "manage.shift.staffing.col.needed"
 msgstr "Needed"
+
+msgid "manage.shift.staffing.confirm_noshow"
+msgstr "Mark %name% as a no-show for this shift? Reaching the no-show limit locks their account."
+
+msgid "manage.shift.staffing.confirm_clear_noshow"
+msgstr "Clear the no-show recorded for %name% on this shift?"
 
 msgid "manage.shift.staffing.confirm_unassign"
 msgstr "Remove %name% from this shift?"
@@ -6809,8 +6956,6 @@ msgid "manage.shift_group.filter.clear"
 msgstr "Clear"
 
 
-
-
 # --- assigning a planner selection to a shift group ---
 
 msgid "planner.batch.group.label"
@@ -7416,3 +7561,641 @@ msgstr "Filter departments…"
 
 msgid "board.rail.no_match"
 msgstr "No department matches."
+
+msgid "board.roster.open"
+msgstr "Roster (%count%)"
+
+msgid "board.roster.modal_title"
+msgstr "Roster - %shift%"
+
+msgid "board.roster.empty"
+msgstr "Nobody is on this shift yet."
+
+msgid "board.roster.ban_warning"
+msgstr "Reaching the no-show limit locks the volunteer's account."
+
+msgid "manage.volunteer_type.repair.page.title"
+msgstr "Critter type repair"
+
+msgid "manage.volunteer_type.repair.page.subtitle"
+msgstr "Find and fix users who finished onboarding without a Critter type."
+
+msgid "manage.volunteer_type.repair.action.back"
+msgstr "Back to Critter Types"
+
+msgid "manage.volunteer_type.repair.cause.heading"
+msgstr "No Critter type claims this role"
+
+msgid "manage.volunteer_type.repair.cause.explanation"
+msgstr "Onboarding picks the base type by its role, not its name. While a role is unclaimed, everyone finishing onboarding is given nothing and cannot take a shift. Fix this first: repairing the users below does not stop it happening again."
+
+msgid "manage.volunteer_type.repair.cause.pick"
+msgstr "Type to use for the \"%role%\" role"
+
+msgid "manage.volunteer_type.repair.cause.healthy"
+msgstr "Both roles are claimed. Onboarding can assign a base type."
+
+msgid "manage.volunteer_type.repair.cause.ambiguous"
+msgstr "More than one type claims the \"%role%\" role (%types%). New users receive whichever the database returns first."
+
+msgid "manage.volunteer_type.repair.action.claim"
+msgstr "Use this type"
+
+msgid "manage.volunteer_type.repair.affected.heading"
+msgstr "Affected users (%count%)"
+
+msgid "manage.volunteer_type.repair.affected.subtitle"
+msgstr "Onboarded, holding no Critter type at all, and therefore unable to join any shift."
+
+msgid "manage.volunteer_type.repair.affected.search"
+msgstr "Search by username"
+
+msgid "manage.volunteer_type.repair.affected.none"
+msgstr "Nobody is affected."
+
+msgid "manage.volunteer_type.repair.affected.kind"
+msgstr "Counts as"
+
+msgid "manage.volunteer_type.repair.affected.receives"
+msgstr "Will receive"
+
+msgid "manage.volunteer_type.repair.affected.nothing"
+msgstr "nothing, role unclaimed"
+
+msgid "manage.volunteer_type.repair.kind.staff"
+msgstr "Staff"
+
+msgid "manage.volunteer_type.repair.kind.volunteer"
+msgstr "Critter"
+
+msgid "manage.volunteer_type.repair.action.fix_selected"
+msgstr "Assign to selected"
+
+msgid "manage.volunteer_type.repair.action.fix_all"
+msgstr "Assign to all %count% affected"
+
+msgid "manage.volunteer_type.repair.confirm.selected"
+msgstr "Assign the base Critter type to the selected users?"
+
+msgid "manage.volunteer_type.repair.confirm.all"
+msgstr "Assign the base Critter type to all %count% affected users?"
+
+msgid "manage.volunteer_type.repair.flash.role_invalid"
+msgstr "Pick an existing Critter type and a valid role."
+
+msgid "manage.volunteer_type.repair.flash.role_claimed"
+msgstr "\"%type%\" now serves the \"%role%\" role."
+
+msgid "manage.volunteer_type.repair.flash.repaired"
+msgstr "%count% user(s) received the base Critter type."
+
+msgid "manage.volunteer_type.repair.flash.skipped"
+msgstr "%count% user(s) were skipped because no type claims the role they need."
+
+msgid "manage.volunteer_type.repair.action.open"
+msgstr "Repair missing types"
+
+msgid "manage.volunteer_type.field.role.label"
+msgstr "System role"
+
+msgid "manage.volunteer_type.field.role.help"
+msgstr "Onboarding gives new users the type holding the matching role. Exactly one type should hold each role; leave it blank for ordinary types."
+
+msgid "manage.volunteer_type.field.role.none"
+msgstr "None (ordinary type)"
+
+msgid "manage.volunteer_type.field.role.volunteer"
+msgstr "Base type for non-staff users"
+
+msgid "manage.volunteer_type.field.role.staff"
+msgstr "Base type for staff"
+
+msgid "manage.volunteer_type.field.role.taken"
+msgstr "Another Critter type already holds this role. Clear it there first."
+
+msgid "backstage.card.security.title"
+msgstr "Location check-in"
+
+msgid "backstage.card.security.text"
+msgstr "Admit staff and Critters to the venue and record who came in."
+
+msgid "backstage.security.page.title"
+msgstr "Location check-in"
+
+msgid "backstage.security.page.subtitle"
+msgstr "Find somebody and record that they entered the venue."
+
+msgid "backstage.security.search.placeholder"
+msgstr "Username, registration number, or exact email"
+
+msgid "backstage.security.no_matches.title"
+msgstr "Nobody found"
+
+msgid "backstage.security.no_matches.message"
+msgstr "Check the spelling, or try the registration number."
+
+msgid "backstage.security.stat.total"
+msgstr "Inside today"
+
+msgid "backstage.security.stat.staff"
+msgstr "Staff"
+
+msgid "backstage.security.stat.volunteers"
+msgstr "Critters"
+
+msgid "backstage.security.user.title"
+msgstr "Location check-in: %name%"
+
+msgid "backstage.security.user.subtitle"
+msgstr "Entry status, today's shifts and the full history."
+
+msgid "backstage.security.card.identity"
+msgstr "Identity"
+
+msgid "backstage.security.card.entry"
+msgstr "Entry"
+
+msgid "backstage.security.card.shifts"
+msgstr "Shifts today"
+
+msgid "backstage.security.card.history"
+msgstr "History"
+
+msgid "backstage.security.label.registration"
+msgstr "Registration number"
+
+msgid "backstage.security.label.kind"
+msgstr "Counts as"
+
+msgid "backstage.security.label.when"
+msgstr "When"
+
+msgid "backstage.security.label.what"
+msgstr "What"
+
+msgid "backstage.security.label.by"
+msgstr "By"
+
+msgid "backstage.security.label.overridden"
+msgstr "Overridden"
+
+msgid "backstage.security.label.override_reason"
+msgstr "Reason for admitting anyway"
+
+msgid "backstage.security.kind.staff"
+msgstr "Staff"
+
+msgid "backstage.security.kind.volunteer"
+msgstr "Critter"
+
+msgid "backstage.security.state.inside"
+msgstr "Checked in and inside the venue."
+
+msgid "backstage.security.shifts.none"
+msgstr "No shifts today."
+
+msgid "backstage.security.history.none"
+msgstr "Never checked in."
+
+msgid "backstage.security.action.enter"
+msgstr "Check in"
+
+msgid "backstage.security.action.withdraw"
+msgstr "Withdraw check-in"
+
+msgid "backstage.security.action.override"
+msgstr "Admit anyway"
+
+msgid "backstage.security.action.entered"
+msgstr "Checked in"
+
+msgid "backstage.security.action.withdrawn"
+msgstr "Withdrawn"
+
+msgid "backstage.security.action.back"
+msgstr "Back to check-in"
+
+msgid "backstage.security.action.report"
+msgstr "Daily report"
+
+msgid "backstage.security.action.export"
+msgstr "Download CSV"
+
+msgid "backstage.security.action.show_day"
+msgstr "Show day"
+
+msgid "backstage.security.confirm.withdraw"
+msgstr "Withdraw this check-in? The record of it stays in the history."
+
+msgid "backstage.security.confirm.override"
+msgstr "This person does not meet the entry rules. Admit them anyway and record the reason?"
+
+msgid "backstage.security.refused.no_registration"
+msgstr "No registration number, so no wristband can be issued. Send them to the info desk."
+
+msgid "backstage.security.refused.no_shift"
+msgstr "No shift starting within %hours% hours and none under way."
+
+msgid "backstage.security.flash.entered"
+msgstr "%name% was checked in."
+
+msgid "backstage.security.flash.entered_override"
+msgstr "%name% was admitted against the rules, and the reason was recorded."
+
+msgid "backstage.security.flash.withdrawn"
+msgstr "The check-in for %name% was withdrawn."
+
+msgid "backstage.security.flash.refused"
+msgstr "This person does not meet the entry rules."
+
+msgid "backstage.security.flash.override_denied"
+msgstr "You may not override the entry rules."
+
+msgid "backstage.security.report.title"
+msgstr "Location check-in report"
+
+msgid "backstage.security.report.subtitle"
+msgstr "Who entered the venue on a given day."
+
+msgid "backstage.security.report.empty.title"
+msgstr "Nobody checked in"
+
+msgid "backstage.security.report.empty.message"
+msgstr "No entries were recorded for this day."
+
+msgid "manage.operations_config.field.security_checkin_window.label"
+msgstr "Location check-in window (seconds)"
+
+msgid "manage.operations_config.field.security_checkin_window.help"
+msgstr "How far ahead of a shift a Critter may collect a wristband. A shift already under way always qualifies."
+
+msgid "shift.filter.clear"
+msgstr "Clear filters"
+
+
+# ==========================================================================
+# manage.statistics.* - closing-ceremony statistics dashboard
+# ==========================================================================
+
+msgid "manage.index.card.statistics.title"
+msgstr "Event statistics"
+
+msgid "manage.index.card.statistics.desc"
+msgstr "Totals for the whole event, ready to present at the closing ceremony."
+
+msgid "manage.statistics.page.title"
+msgstr "Event statistics"
+
+msgid "manage.statistics.page.subtitle"
+msgstr "What the event added up to."
+
+msgid "manage.statistics.action.refresh"
+msgstr "Refresh"
+
+msgid "manage.statistics.action.edit_tallies"
+msgstr "Edit hand-counted figures"
+
+msgid "manage.statistics.action.back_to_stats"
+msgstr "Back to statistics"
+
+msgid "manage.statistics.action.present"
+msgstr "Presentation mode"
+
+msgid "manage.statistics.action.exit_present"
+msgstr "Leave presentation mode"
+
+msgid "manage.statistics.scope.window"
+msgstr "Covering %from% to %to%"
+
+msgid "manage.statistics.scope.unbounded"
+msgstr "Covering everything recorded, because no event dates are configured"
+
+msgid "manage.statistics.scope.generated"
+msgstr "calculated %at%"
+
+msgid "manage.statistics.section.base"
+msgstr "Base numbers"
+
+msgid "manage.statistics.section.base_help"
+msgstr "Counted from the records. Draft shifts are left out, and time a person spent on two things at once is counted once."
+
+msgid "manage.statistics.section.fun"
+msgstr "Just for fun"
+
+msgid "manage.statistics.section.fun_warning"
+msgstr "Estimates, not measurements. Each figure below multiplies a real total by the assumption printed beneath it. Treat them as entertainment, and keep them out of any report."
+
+msgid "manage.statistics.stat.shifts"
+msgstr "Shifts"
+
+msgid "manage.statistics.stat.people_active"
+msgstr "People who worked"
+
+msgid "manage.statistics.stat.hours_worked"
+msgstr "Hours worked"
+
+msgid "manage.statistics.stat.hours_worked_hint"
+msgstr "wall-clock, overlaps merged"
+
+msgid "manage.statistics.stat.registered"
+msgstr "Registered accounts"
+
+msgid "manage.statistics.stat.slots"
+msgstr "Slots filled"
+
+msgid "manage.statistics.stat.split"
+msgstr "Volunteers / staff who worked"
+
+msgid "manage.statistics.stat.departments"
+msgstr "Departments running shifts"
+
+msgid "manage.statistics.stat.busiest"
+msgstr "busiest: %name%"
+
+msgid "manage.statistics.stat.noshows"
+msgstr "No-shows"
+
+msgid "manage.statistics.stat.entries"
+msgstr "of %count% signups"
+
+msgid "manage.statistics.card.hours"
+msgstr "Hours"
+
+msgid "manage.statistics.card.shifts"
+msgstr "Shifts by audience"
+
+msgid "manage.statistics.hours.wallclock"
+msgstr "Wall-clock"
+
+msgid "manage.statistics.hours.credited"
+msgstr "Credited"
+
+msgid "manage.statistics.hours.planned"
+msgstr "Planned"
+
+msgid "manage.statistics.hours.worked"
+msgstr "Worked"
+
+msgid "manage.statistics.hours.by_volunteers"
+msgstr "by volunteers"
+
+msgid "manage.statistics.hours.by_staff"
+msgstr "by staff"
+
+msgid "manage.statistics.hours.duty"
+msgstr "of which on duty"
+
+msgid "manage.statistics.hours.worklog"
+msgstr "of which logged by hand"
+
+msgid "manage.statistics.shifts.audience"
+msgstr "Offered to"
+
+msgid "manage.statistics.shifts.count"
+msgstr "Shifts"
+
+msgid "manage.statistics.shifts.hours"
+msgstr "Hours"
+
+msgid "manage.statistics.shifts.total"
+msgstr "Total"
+
+msgid "manage.statistics.shifts.draft"
+msgstr "Drafts, never published"
+
+msgid "manage.statistics.fun.empty.title"
+msgstr "Nothing to compare yet"
+
+msgid "manage.statistics.fun.empty.message"
+msgstr "Once shifts have been worked, this section fills up on its own."
+
+msgid "manage.statistics.fun.add_tallies"
+msgstr "Counted something by hand this event, like cups of coffee?"
+
+msgid "manage.statistics.fun.distance.caption"
+msgstr "kilometres walked on shift"
+
+msgid "manage.statistics.fun.distance.basis"
+msgstr "assumes %pace% km/h average movement while on shift"
+
+msgid "manage.statistics.fun.scale.basis"
+msgstr "reference distance: %km% km"
+
+msgid "manage.statistics.fun.scale.marathon.caption"
+msgstr "marathons"
+
+msgid "manage.statistics.fun.scale.germany.caption"
+msgstr "times the length of Germany"
+
+msgid "manage.statistics.fun.scale.earth.caption"
+msgstr "times around the equator"
+
+msgid "manage.statistics.fun.scale.moon.caption"
+msgstr "times to the Moon"
+
+msgid "manage.statistics.fun.nonstop.caption"
+msgstr "years of one person working non-stop"
+
+msgid "manage.statistics.fun.nonstop.basis"
+msgstr "no sleep, no breaks, all day every day"
+
+msgid "manage.statistics.fun.careers.caption"
+msgstr "entire working careers"
+
+msgid "manage.statistics.fun.careers.basis"
+msgstr "assumes a career of 40 years at 1,700 hours a year"
+
+msgid "manage.statistics.fun.fulltime.caption"
+msgstr "full-time staff for the whole event"
+
+msgid "manage.statistics.fun.fulltime.basis"
+msgstr "assumes 8-hour days across %days% days of event"
+
+msgid "manage.statistics.fun.films.caption"
+msgstr "feature films' worth of time"
+
+msgid "manage.statistics.fun.films.basis"
+msgstr "assumes a two-hour film"
+
+msgid "manage.statistics.fun.bananas.caption"
+msgstr "bananas of energy burned"
+
+msgid "manage.statistics.fun.bananas.basis"
+msgstr "assumes %kcal% kcal an hour on shift, 105 kcal a banana"
+
+msgid "manage.statistics.fun.coaches.caption"
+msgstr "coaches needed to move everyone"
+
+msgid "manage.statistics.fun.coaches.basis"
+msgstr "assumes %seats% seats a coach"
+
+msgid "manage.statistics.fun.coffee_bathtubs.caption"
+msgstr "bathtubs of coffee"
+
+msgid "manage.statistics.fun.coffee_bathtubs.basis"
+msgstr "%litres% litres in total, at %cup% litres a cup"
+
+msgid "manage.statistics.fun.caffeine.caption"
+msgstr "grams of caffeine consumed"
+
+msgid "manage.statistics.fun.caffeine.basis"
+msgstr "assumes %mg% mg a cup"
+
+msgid "manage.statistics.fun.value.caption"
+msgstr "%currency% of donated time"
+
+msgid "manage.statistics.fun.value.basis"
+msgstr "hours worked at %rate% %currency% an hour, a notional rate nobody was paid"
+
+msgid "manage.statistics.tally.coffee.label"
+msgstr "Cups of coffee"
+
+msgid "manage.statistics.tally.coffee.caption"
+msgstr "cups of coffee"
+
+msgid "manage.statistics.tally.energy_drinks.label"
+msgstr "Energy drinks"
+
+msgid "manage.statistics.tally.energy_drinks.caption"
+msgstr "energy drinks"
+
+msgid "manage.statistics.tally.water.label"
+msgstr "Bottles of water"
+
+msgid "manage.statistics.tally.water.caption"
+msgstr "bottles of water"
+
+msgid "manage.statistics.tally.meals.label"
+msgstr "Meals served"
+
+msgid "manage.statistics.tally.meals.caption"
+msgstr "meals served"
+
+msgid "manage.statistics.tally.pizza.label"
+msgstr "Pizzas"
+
+msgid "manage.statistics.tally.pizza.caption"
+msgstr "pizzas"
+
+msgid "manage.statistics.tally.sweets.label"
+msgstr "Sweets handed out"
+
+msgid "manage.statistics.tally.sweets.caption"
+msgstr "sweets handed out"
+
+msgid "manage.statistics.tally.batteries.label"
+msgstr "Batteries used"
+
+msgid "manage.statistics.tally.batteries.caption"
+msgstr "batteries used"
+
+msgid "manage.statistics.tally.radios.label"
+msgstr "Radios handed out"
+
+msgid "manage.statistics.tally.radios.caption"
+msgstr "radios handed out"
+
+msgid "manage.statistics.tally.cable.label"
+msgstr "Metres of cable laid"
+
+msgid "manage.statistics.tally.cable.caption"
+msgstr "metres of cable laid"
+
+msgid "manage.statistics.tally.plasters.label"
+msgstr "Plasters applied"
+
+msgid "manage.statistics.tally.plasters.caption"
+msgstr "plasters applied"
+
+msgid "manage.statistics.tally.stickers.label"
+msgstr "Stickers given out"
+
+msgid "manage.statistics.tally.stickers.caption"
+msgstr "stickers given out"
+
+msgid "manage.statistics.tally.hugs.label"
+msgstr "Hugs"
+
+msgid "manage.statistics.tally.hugs.caption"
+msgstr "hugs"
+
+msgid "manage.statistics.tallies.page.title"
+msgstr "Hand-counted figures"
+
+msgid "manage.statistics.tallies.page.subtitle"
+msgstr "The things no system records. Leave anything you did not count blank and it stays off the dashboard."
+
+msgid "manage.statistics.tallies.section.counted"
+msgstr "Counted by hand"
+
+msgid "manage.statistics.tallies.section.counted_help"
+msgstr "A blank field is not zero. It means this event did not count that, and the figure is left out entirely."
+
+msgid "manage.statistics.tallies.section.value"
+msgstr "Notional hourly rate"
+
+msgid "manage.statistics.tallies.section.value_help"
+msgstr "Optional, and off by default. Fill this in only if you want the fun section to show what the volunteered hours would have cost at an hourly rate. Nobody was paid it."
+
+msgid "manage.statistics.tallies.custom.title"
+msgstr "Anything else you counted"
+
+msgid "manage.statistics.tallies.custom.help"
+msgstr "For the figures unique to this event. Rows missing a name or an amount are discarded when you save."
+
+msgid "manage.statistics.tallies.custom.add"
+msgstr "Add a figure"
+
+msgid "manage.statistics.tallies.custom.label"
+msgstr "What was counted"
+
+msgid "manage.statistics.tallies.custom.placeholder"
+msgstr "wristbands issued"
+
+msgid "manage.statistics.tallies.custom.amount"
+msgstr "How many"
+
+msgid "manage.statistics.tallies.hourly_rate.label"
+msgstr "Hourly rate"
+
+msgid "manage.statistics.tallies.hourly_rate.help"
+msgstr "Leave blank to hide this comparison."
+
+msgid "manage.statistics.tallies.currency.label"
+msgstr "Currency"
+
+msgid "manage.statistics.tallies.flash.saved"
+msgstr "Hand-counted figures saved."
+
+msgid "manage.statistics.stat.shifts_volunteer"
+msgstr "Volunteer shifts"
+
+msgid "manage.statistics.stat.shifts_staff"
+msgstr "Staff-only shifts"
+
+msgid "manage.statistics.stat.hours_scheduled"
+msgstr "Hours of shift scheduled"
+
+msgid "manage.statistics.stat.average_hours"
+msgstr "Average hours per person"
+
+msgid "manage.statistics.card.more"
+msgstr "More numbers"
+
+msgid "manage.statistics.more.participation"
+msgstr "Registered accounts that worked"
+
+msgid "manage.statistics.more.staff_accounts"
+msgstr "Staff accounts"
+
+msgid "manage.statistics.more.locations"
+msgstr "Locations used"
+
+msgid "manage.statistics.more.longest_shift"
+msgstr "Longest single shift (hours)"
+
+msgid "manage.statistics.more.assignments"
+msgstr "Confirmed assignments"
+
+msgid "manage.statistics.more.applications"
+msgstr "Applications awaiting confirmation"

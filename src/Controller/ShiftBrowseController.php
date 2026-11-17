@@ -15,7 +15,9 @@ use App\Service\CheckInMessageProvider;
 use App\Service\DisplaySettings;
 use App\Service\HoursCalculator;
 use App\Service\Shift\CheckInPolicy;
+use App\Service\Shift\ShiftDossierPresenter;
 use App\Service\Shift\ShiftEligibility;
+use App\Service\Shift\ShiftFilterMemory;
 use App\Service\Shift\ShiftGroupResolver;
 use App\Service\Shift\ShiftGroupSignupService;
 use App\Service\Shift\ShiftRequirementsResolver;
@@ -50,15 +52,26 @@ final class ShiftBrowseController extends AbstractController
         private readonly ShiftEligibility $eligibility,
         private readonly CheckInPolicy $checkIn,
         private readonly CheckInMessageProvider $checkInMessage,
+        private readonly ShiftFilterMemory $filterMemory,
+        private readonly ShiftDossierPresenter $dossier,
     ) {
     }
 
     /**
      * The browsable shift list for one day, grouped by local start hour.
      *
+     * The filters are restored from the viewer's last visit when the request states none of its
+     * own, so coming back to this page shows what they were looking at. A URL that carries filters
+     * always wins, so a shared or bookmarked link is never overridden by the recipient's own last
+     * choice. The day is never restored: it expires, and landing somebody on yesterday reads as an
+     * empty page rather than as a remembered filter.
+     *
      * The eligibility rules are preloaded for the whole day and dropped again in a `finally`: what
      * they hold is entities, the volunteer's own entries and the live capacity counts, so a preload
      * left standing would answer the next caller with this render's data.
+     *
+     * A grouped shift is counted here and never described: the card says "part of N shifts" and the
+     * modal fetches the detail, which is where the visibility filter runs.
      */
     #[IsGranted('shift:view')]
     #[Route('/shifts', name: 'app_shift_index', methods: ['GET'])]
@@ -70,10 +83,12 @@ final class ShiftBrowseController extends AbstractController
         $tz = $this->display->timezone();
         $days = $this->shifts->findUpcomingDays($tz);
         $selectedDate = $this->resolveDate((string) $request->query->get('date', ''), $days, $tz);
-        $location = $locationRepo->findOneByUuid((string) $request->query->get('location'));
-        $shiftTask = $shiftTaskRepo->findOneByUuid((string) $request->query->get('type'));
-        $onlyAvailable = $request->query->getBoolean('available');
-        $onlyMine = $request->query->getBoolean('mine');
+
+        $filters = $this->filterMemory->resolve($user, ShiftFilterMemory::SURFACE_BROWSE, $request->query->all());
+        $location = $locationRepo->findOneByUuid((string) ($filters['location'] ?? ''));
+        $shiftTask = $shiftTaskRepo->findOneByUuid((string) ($filters['type'] ?? ''));
+        $onlyAvailable = isset($filters['available']);
+        $onlyMine = isset($filters['mine']);
 
         $shifts = $this->shifts->findForDay($selectedDate, $tz, $location, $shiftTask);
 
@@ -99,8 +114,6 @@ final class ShiftBrowseController extends AbstractController
                     'status' => $status,
                     'options' => $this->signup->signupOptions($shift, $user),
                     'myEntry' => $this->entries->findOneByShiftAndUser($shift, $user),
-                    // Only counted, not described: the card shows "part of N shifts" and the modal
-                    // fetches the detail, which is where the visibility filter runs.
                     'groupSize' => \count($this->groups->membersFor($shift)),
                 ];
             }
@@ -124,6 +137,14 @@ final class ShiftBrowseController extends AbstractController
         ]);
     }
 
+    /**
+     * The volunteer browser exposes only shifts this viewer may see: a draft or staff-only shift
+     * reached by id answers 404, so the page cannot be used to confirm that it exists.
+     *
+     * Group siblings are listed only when the whole group is visible to the viewer. A member they
+     * may not see is absent from the list, and the plan behind the modal then refuses the whole
+     * group without naming it.
+     */
     #[IsGranted('shift:view')]
     #[Route('/shifts/{id}', name: 'app_shift_show', methods: ['GET'], requirements: ['id' => Requirement::UUID])]
     public function show(#[MapEntity(mapping: ['id' => 'uuid'])] Shift $shift): Response
@@ -131,21 +152,41 @@ final class ShiftBrowseController extends AbstractController
         /** @var User $user */
         $user = $this->getUser();
 
-        // The volunteer browser only exposes published public shifts; a draft or
-        // staff-only shift reached by id must not leak here.
         if (!$this->visibility->isVisibleTo($shift, $user)) {
             throw $this->createNotFoundException();
         }
 
         return $this->render('shift/show.html.twig', [
             'shift' => $shift,
-            'availability' => $this->signup->availability($shift),
             'myEntry' => $this->entries->findOneByShiftAndUser($shift, $user),
             'signupOptions' => $this->signup->signupOptions($shift, $user),
-            // Siblings the viewer may see. A member they may not see is absent, and the plan behind
-            // the modal refuses the whole group without naming it.
-            'groupSiblings' => $this->groups->isFullyVisibleTo($shift, $user) ? $this->groups->siblingsOf($shift) : [],
+            'dossier' => $this->dossier->present($shift, $user),
         ]);
+    }
+
+    /**
+     * The dossier on its own, for the dialog that opens it from a shift list.
+     *
+     * Same shift, same viewer, same filtering as the page: {@see ShiftDossierPresenter} decides what
+     * this answers with, so the dialog can never show what the page would withhold. A shift the
+     * viewer may not see answers 404 here too, or the dialog would confirm it exists.
+     *
+     * This is a fragment and is injected into a page, so it must never be answered with a whole
+     * document. Nothing may be allowed to redirect it: fetch follows redirects, and the 200 that
+     * comes back would carry an entire page into the dialog body.
+     */
+    #[IsGranted('shift:view')]
+    #[Route('/shifts/{id}/info', name: 'app_shift_info', methods: ['GET'], requirements: ['id' => Requirement::UUID])]
+    public function info(#[MapEntity(mapping: ['id' => 'uuid'])] Shift $shift): Response
+    {
+        /** @var User $user */
+        $user = $this->getUser();
+
+        if (!$this->visibility->isVisibleTo($shift, $user)) {
+            throw $this->createNotFoundException();
+        }
+
+        return $this->render('shift/_dossier.html.twig', [...$this->dossier->present($shift, $user), 'heading' => true]);
     }
 
     /**
@@ -155,6 +196,9 @@ final class ShiftBrowseController extends AbstractController
      * `volunteer_type`; the dialog, which is where the browse list asks, posts the answer under
      * `group_type` keyed by shift uuid, the origin included. Either way it is looked up in
      * `signupOptions()`, so what the form posts never widens what the volunteer may take.
+     *
+     * A capacity conflict means the group filled between the modal being rendered and submitted, so
+     * it is reported as a warning rather than an error.
      */
     #[IsGranted('shift:view')]
     #[Route('/shifts/{id}/signup', name: 'app_shift_signup', methods: ['POST'], requirements: ['id' => Requirement::UUID])]
@@ -190,7 +234,6 @@ final class ShiftBrowseController extends AbstractController
                         ? new TranslatableMessage('shift.flash.signed_up_group', ['%count%' => \count($created)])
                         : new TranslatableMessage('shift.flash.signed_up', ['%name%' => $type->getName()]));
                 } catch (CapacityConflictException $e) {
-                    // The group filled up between rendering the modal and submitting it.
                     $this->addFlash('warning', $e->getMessage());
                 } catch (\RuntimeException $e) {
                     $this->addFlash('danger', $e->getMessage());
@@ -312,6 +355,9 @@ final class ShiftBrowseController extends AbstractController
      * both the day window ({@see ShiftRepository::findForDay()}) and the rendered date land
      * on the intended day rather than drifting across a UTC midnight boundary.
      *
+     * A date parameter that cannot be parsed falls back to the first available day instead of
+     * failing the request.
+     *
      * @param string[] $days
      */
     private function resolveDate(string $dateParam, array $days, \DateTimeZone $tz): \DateTimeImmutable
@@ -320,7 +366,6 @@ final class ShiftBrowseController extends AbstractController
             try {
                 return (new \DateTimeImmutable($dateParam, $tz))->setTime(12, 0);
             } catch (\Exception) {
-                // fall through to defaults
             }
         }
 

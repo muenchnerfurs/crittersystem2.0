@@ -39,6 +39,9 @@ class DutyRecordRepository extends ServiceEntityRepository
      * Duty sessions in one department that were open at any point in [$from, $to), with the user
      * joined. An open session counts whenever it started before $to, since it has not ended yet.
      *
+     * The user's one-to-one satellites are joined too: Doctrine fetches every mappedBy one-to-one on
+     * User eagerly, so each hydrated user without them costs five further queries.
+     *
      * @return DutyRecord[] oldest first
      */
     public function findForDepartmentOverlapping(Department $department, \DateTimeImmutable $from, \DateTimeImmutable $to): array
@@ -46,8 +49,6 @@ class DutyRecordRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('d')
             ->leftJoin('d.department', 'dep')->addSelect('dep')
             ->join('d.user', 'u')->addSelect('u')
-            // Doctrine fetches every mappedBy one-to-one on User eagerly, so a hydrated user costs
-            // five further queries without these.
             ->leftJoin('u.personalData', 'pd')->addSelect('pd')
             ->leftJoin('u.contact', 'c')->addSelect('c')
             ->leftJoin('u.settings', 'st')->addSelect('st')
@@ -62,6 +63,32 @@ class DutyRecordRepository extends ServiceEntityRepository
             ->orderBy('d.startedAt', 'ASC')
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * Duty periods overlapping the given bounds, as scalar rows keyed by user id.
+     *
+     * The user is deliberately not hydrated: every mappedBy one-to-one on User loads eagerly, so
+     * hydrating an event's worth of duty records would cost five further queries each. Either bound
+     * may be null, meaning unbounded on that side. An open session is still running and so counts
+     * whenever it started before the upper bound.
+     *
+     * @return list<array{userId: int, startedAt: \DateTimeImmutable, endedAt: ?\DateTimeImmutable}>
+     */
+    public function findPeriodsOverlapping(?\DateTimeImmutable $from, ?\DateTimeImmutable $to): array
+    {
+        $qb = $this->createQueryBuilder('d')
+            ->select('IDENTITY(d.user) AS userId', 'd.startedAt AS startedAt', 'd.endedAt AS endedAt');
+
+        if ($to !== null) {
+            $qb->andWhere('d.startedAt < :to')->setParameter('to', $to);
+        }
+        if ($from !== null) {
+            $qb->andWhere($qb->expr()->orX('d.endedAt IS NULL', 'd.endedAt > :from'))
+                ->setParameter('from', $from);
+        }
+
+        return $qb->getQuery()->getArrayResult();
     }
 
     /** @return DutyRecord[] a user's duty history, newest first */

@@ -33,7 +33,26 @@ final class Topics
         return self::PREFIX.'user:'.$user->getUuid().':status';
     }
 
-    /** Help calls this user is eligible to answer. Fanned out per user, never broadcast. */
+    /**
+     * Every open help call, for everybody who may answer one.
+     *
+     * Shared rather than fanned out per user. Any call is now offered to anyone who may answer it,
+     * so a per-user fan-out meant one publish per account on the system every time a call was
+     * raised, filled or cancelled. The signal carries nothing but "this changed": the board
+     * re-requests the list and the controller decides what that viewer may see, so subscribing to
+     * this reveals nothing.
+     */
+    public static function allCalls(): string
+    {
+        return self::PREFIX.'calls';
+    }
+
+    /**
+     * Changes to help calls that concern one person only, such as their own refusal.
+     *
+     * Kept alongside {@see allCalls()}: a refusal takes a call off one board and nobody else's, and
+     * nudging every board on the system to re-read for that would be noise.
+     */
     public static function userCalls(User $user): string
     {
         return self::PREFIX.'user:'.$user->getUuid().':calls';
@@ -51,11 +70,11 @@ final class Topics
      * The one templated selector in the vocabulary, and only for a grant that is genuinely
      * event-wide: an administrator, or a privilege held through an assignment with no department
      * scope. Enumerating instead is not more secure - it authorizes the same thing - but it is
-     * unbounded: 62 departments produced a 6.6 KB token, which a browser drops as an oversized
-     * cookie and which nginx rejects as an oversized response header, so every page 502'd.
+     * unbounded: 62 departments make a 6.6 KB token, which a browser drops as an oversized cookie
+     * and which nginx rejects as an oversized response header, so every page answers 502.
      *
      * It also covers departments created after the token was minted, which enumeration silently
-     * did not.
+     * does not.
      *
      * NEVER hand this to a scoped user. {@see \App\Mercure\TopicBuilder} decides, from
      * {@see \App\Security\PrivilegeScopeResolver}, and nowhere else.
